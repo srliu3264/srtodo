@@ -16,6 +16,25 @@ It reads directly from a Markdown file, supports categorization, and handles lin
 - 🔗 **Link Support**: Hides ugly URLs and provides a clickable link icon (also can press `Ctrl+y` to open).
 - 🎨 **Rofi Interface**: Uses your system theme.
 
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Install/Uninstall](#installuninstall)
+  - [Manual Install](#manual-install)
+  - [ArchLinux](#archlinux)
+    - [Using AUR-helper](#using-aur-helper)
+    - [Manually](#manually)
+  - [Uninstallation](#uninstallation)
+- [Setup](#setup)
+- [Usage](#usage)
+  - [Menu](#menu)
+  - [Terminal Commands](#terminal-commands)
+  - [Todo Markdown file](#todo-markdown-file)
+  - [Optional](#optional)
+    - [Shortcut through Window Manager](#shortcut-through-window-manager)
+    - [Static Website Generator](#static-website-generator)
+
 ## Requirements
 
 - [rofi](https://github.com/davatorium/rofi)
