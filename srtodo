@@ -1,0 +1,201 @@
+#!/bin/bash
+
+# --- CONSTANTS ---
+CONFIG_DIR="$HOME/.config/srtodo"
+CONFIG_FILE="$CONFIG_DIR/config"
+SELF_PATH="$0"
+
+# --- HELPER FUNCTIONS ---
+function show_help() {
+    echo "Usage: srtodo [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --config --path <path>   Set the path to your Markdown todo file"
+    echo "  --template <path>        Generate a new template todo file at <path>"
+    echo "  --uninstall              Remove srtodo and its configuration completely"
+    echo "  --help                   Show this help message"
+    echo ""
+    echo "Example:"
+    echo "  srtodo --template ~/documents/mytodo.md"
+    echo "  srtodo --config --path ~/documents/mytodo.md"
+}
+
+function create_template() {
+    local TARGET_PATH="$1"
+    
+    if [[ -z "$TARGET_PATH" ]]; then
+        echo "Error: Please provide a path for the template."
+        exit 1
+    fi
+
+    local REAL_PATH=$(realpath -m "$TARGET_PATH")
+
+    if [[ -f "$REAL_PATH" ]]; then
+        echo "Error: File already exists at $REAL_PATH. Aborting to prevent overwrite."
+        exit 1
+    fi
+
+    # Ensure directory exists
+    mkdir -p "$(dirname "$REAL_PATH")"
+
+    # Write Template Content
+    cat <<EOF > "$REAL_PATH"
+## Habits
+- [ ] Habit1
+- [ ] Habit2
+
+## Work
+- [ ] [Use Zola Theme MATbook](https://www.getzola.org/themes/matbook/)
+- [ ] Update documentation
+
+## Math
+- [ ] Prove Riemann Hypothesis
+- [ ] Prove abc conjecture
+
+## Finish
+- [x] Slack off(date1)
+EOF
+
+    echo "✓ Template created successfully at: $REAL_PATH"
+    echo ""
+    echo "To use this file, run:"
+    echo "  srtodo --config --path \"$REAL_PATH\""
+    exit 0
+}
+
+function perform_uninstall() {
+    echo "⚠  Uninstalling srtodo..."
+    if [ -d "$CONFIG_DIR" ]; then
+        rm -rf "$CONFIG_DIR"
+        echo "✓ Removed configuration directory: $CONFIG_DIR"
+    fi
+
+    REAL_SELF=$(realpath "$SELF_PATH")
+    if [ -f "$REAL_SELF" ]; then
+        rm "$REAL_SELF"
+        echo "✓ Removed executable: $REAL_SELF"
+    else
+        echo "✘ Could not find executable to delete at: $REAL_SELF"
+        exit 1
+    fi
+
+    echo ""
+    echo "Successfully uninstalled srtodo. Bye!"
+    exit 0
+}
+
+# --- ARGUMENT PARSING ---
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --config)
+            if [[ "$2" == "--path" ]]; then
+                if [[ -z "$3" ]]; then echo "Error: No path provided."; exit 1; fi
+                mkdir -p "$CONFIG_DIR"
+                REAL_PATH=$(realpath -m "$3")
+                echo "TODO_FILE=\"$REAL_PATH\"" > "$CONFIG_FILE"
+                echo "Configuration saved! Todo file set to: $REAL_PATH"
+                exit 0
+            else
+                echo "Error: --config must be followed by --path"
+                exit 1
+            fi
+            ;;
+        --template)
+            create_template "$2"
+            ;;
+        --uninstall)
+            perform_uninstall
+            ;;
+        --help|-h)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# --- LOAD CONFIGURATION ---
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+else
+    echo "Error: Configuration not found."
+    echo "1. Generate a file: srtodo --template ~/todo.md"
+    echo "2. Set it:          srtodo --config --path ~/todo.md"
+    exit 1
+fi
+
+# --- CHECK FILE EXISTENCE ---
+if [ ! -f "$TODO_FILE" ]; then
+    rofi -e "Error: File not found at $TODO_FILE" 2>/dev/null || echo "Error: File not found at $TODO_FILE"
+    exit 1
+fi
+
+# --- MAIN LOGIC LOOP ---
+while true; do
+    MENU_ITEMS=$(awk '
+    /^##/ { 
+        text=$0; sub(/^## ?/, "", text);
+        printf "|<span weight=\"bold\" size=\"large\" foreground=\"#888888\">%s</span>\n", text
+        next 
+    }
+    /^- \[/ {
+        content = substr($0, 3) 
+        is_done = (content ~ /^\[x\]/)
+        display_text = content
+        sub(/^\[.\] ?/, "", display_text)
+        display_text = gensub(/\[([^]]+)\]\([^)]+\)/, "\\1 <span foreground=\"#61afef\"></span>", "g", display_text)
+
+        if (is_done) {
+            printf "%d|  <span alpha=\"50%%\"><s>%s</s></span>\n", NR, display_text
+        } else {
+            printf "%d|  %s\n", NR, display_text
+        }
+    }' "$TODO_FILE")
+
+    if [ -z "$MENU_ITEMS" ]; then exit 0; fi
+
+    SELECTION=$(echo "$MENU_ITEMS" | rofi -dmenu \
+        -i -no-sort -markup-rows -p "srtodo" \
+        -kb-accept-entry "Return,KP_Enter" \
+        -kb-custom-1 "Control+y" \
+        -delimiter "|" -eh 1)
+
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -eq 1 ]; then exit 0; fi
+
+    LINE_NUM=$(echo "$SELECTION" | cut -d'|' -f1)
+    if [ -z "$LINE_NUM" ]; then continue; fi
+
+    if [ $EXIT_CODE -eq 0 ]; then
+        CURRENT_LINE=$(sed "${LINE_NUM}q;d" "$TODO_FILE")
+        CURRENT_HEADER=$(sed -n "1,${LINE_NUM}p" "$TODO_FILE" | grep "^##" | tail -n 1)
+
+        if [[ "$CURRENT_LINE" == *"[ ]"* ]]; then
+            if [[ "$CURRENT_HEADER" != *"Habit"* && "$CURRENT_HEADER" != *"Finish"* ]]; then
+                TIMESTAMP=$(date +"(%m-%d-%Y)")
+                NEW_TEXT="${CURRENT_LINE/\[ \]/[x]} $TIMESTAMP"
+                sed -i "${LINE_NUM}d" "$TODO_FILE"
+                FINISH_LINE=$(grep -n "^## Finish" "$TODO_FILE" | cut -d: -f1 | head -n 1)
+                if [ -z "$FINISH_LINE" ]; then
+                    echo -e "\n## Finish" >> "$TODO_FILE"
+                    FINISH_LINE=$(wc -l < "$TODO_FILE")
+                fi
+                sed -i "${FINISH_LINE}a ${NEW_TEXT}" "$TODO_FILE"
+            else
+                sed -i "${LINE_NUM}s/\[ \]/\[x\]/" "$TODO_FILE"
+            fi
+        elif [[ "$CURRENT_LINE" == *"[x]"* ]]; then
+            sed -i "${LINE_NUM}s/\[x\]/\[ \]/" "$TODO_FILE"
+        fi
+    elif [ $EXIT_CODE -eq 10 ]; then
+        CURRENT_LINE=$(sed "${LINE_NUM}q;d" "$TODO_FILE")
+        LINK=$(echo "$CURRENT_LINE" | grep -oP '\]\(\K[^)]+')
+        if [ -z "$LINK" ]; then LINK=$(echo "$CURRENT_LINE" | grep -oP 'https?://[^ ]+'); fi
+        if [ -n "$LINK" ]; then xdg-open "$LINK" > /dev/null 2>&1 & exit 0; fi
+    fi
+done
