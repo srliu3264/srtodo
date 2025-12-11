@@ -3,6 +3,8 @@
 A minimalist, Rofi-based Todo List manager for Linux (AwesomeWM, i3, etc.).
 It reads directly from a Markdown file, supports categorization, and handles links.
 
+![Screenshot](./screenshot.png) 
+
 ## Features
 
 - 📂 **Markdown-based**: Reads/writes directly to a `.md` file.
