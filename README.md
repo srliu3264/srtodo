@@ -3,7 +3,7 @@
 A minimalist, Rofi-based Todo List manager for Linux (AwesomeWM, i3, etc.).
 It reads directly from a Markdown file, supports categorization, and handles links.
 
-![Screenshot](./screenshot.png) 
+![Screenshot](./screenshot.png)
 
 ## Features
 
@@ -34,11 +34,42 @@ cd srtodo
 ./install.sh
 ```
 
-Before runing `install.sh`, you probably need to make the shell scripts excutable. 
+Before runing `install.sh`, you probably need to make the shell scripts excutable.
 
 ```bash
 chmod +x install.sh srtodo 
 ```
+
+### ArchLinux
+
+This is on [AUR](https://aur.archlinux.org/packages/srtodo-git), so you can install it following instructions on [ArchWiki](https://wiki.archlinux.org/title/Arch_User_Repository#Install_the_package). We briefly list two ways for readers' convenience.
+
+#### Using AUR-helper
+
+You can run `sudo yay -S srtodo-git` or `sudo paru -S srtodo-git`, if you have already installed [yay](https://github.com/Jguer/yay) or [paru](https://github.com/Morganamilo/paru).
+
+#### Manually
+
+First go to your AUR folder
+
+```bash
+cd <path-to-your-aur-folder>
+```
+
+Then run
+
+```bash
+git clone https://aur.archlinux.org/srtodo-git.git
+cd srtodo-git
+```
+
+Then build the package
+
+```bash
+makepkg -si
+```
+
+You can also use your package manager to uninstall this srtodo.
 
 ### Uninstallation
 
@@ -114,7 +145,7 @@ The markdown file you used for srtodo should have the following:
 - [x] finish1
 ```
 
-You could remove `##Habits` category if you do not want it, but you have to have the category `## Finish`. 
+You could remove `##Habits` category if you do not want it, but you have to have the category `## Finish`.
 
 ### Optional
 
