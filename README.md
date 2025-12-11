@@ -10,13 +10,13 @@ It reads directly from a Markdown file, supports categorization, and handles lin
 - 🏗 **Auto-Categorization**: Tasks under headers (e.g. `## Work`) are grouped visually.
 - 🔁 **Workflow Logic**:
   - Finishing a generic task moves it to a `## Finish` section with a timestamp.
-  - "Habit" tasks stay in place for daily reuse.
-- 🔗 **Link Support**: Hides ugly URLs and provides a clickable link icon (Ctrl+Y).
+  - `## Habit` tasks stay in place for daily reuse.
+- 🔗 **Link Support**: Hides ugly URLs and provides a clickable link icon (also can press `Ctrl+y` to open).
 - 🎨 **Rofi Interface**: Uses your system theme.
 
 ## Requirements
 
-- `rofi`
+- [rofi](https://github.com/davatorium/rofi)
 - `awk`, `sed`, `grep`, `coreutils` (Standard on almost all Linux distros)
 - A Nerd Font (for the link icon)
 
@@ -27,7 +27,7 @@ It reads directly from a Markdown file, supports categorization, and handles lin
 You only need to download the project from github, and then run the `install.sh`.
 
 ```bash
-git clone [https://github.com/srliu3264/srtodo.git](https://github.com/srliu3264/srtodo.git)
+git clone https://github.com/srliu3264/srtodo.git
 cd srtodo
 ./install.sh
 ```
@@ -40,25 +40,30 @@ chmod +x install.sh srtodo
 
 ### Uninstallation
 
+You could simply run
+
 ```bash
 srtodo --uninstall
 ```
 
+and then it will remove `srtodo` and `.config/srtodo`
+
 ## Setup
 
-1. Generate a Template (optional):
+1. Generate a Template (optional) to your specified path and file name:
 
 ```bash
-srtodo --template < ~/Documents/todo.md >
+srtodo --template </home/usr/todo.md>
 ```
 
-2. Link the Todo.md:
+2. Link your todo markdown file:
 
 ```bash
-srtodo --config --path < ~/Documents/todo.md>
+srtodo --config --path </home/usr/todo.md>
 ```
 
 3. Run it to open the todo list menu:
+
 ```bash
 srtodo
 ```
@@ -70,7 +75,7 @@ srtodo
 | Key | Action |
 | -------------- | --------------- |
 | `<Enter>` | Toggle task (Completed tasks move to 'Finish' section with timestamp unless they are Habits) |
-| `<Ctrl> + Y` | Open link in browser |
+| `<Ctrl> + y` | Open link in browser |
 |`<Esc>`|Close Menu|
 
 ### Terminal Commands
@@ -84,6 +89,30 @@ srtodo
 
 
 You can use your favorite editor to edit your `todo.md`, write new tasks or manually changes orders, etc.
+
+### Todo Markdown file
+
+The markdown file you used for srtodo should have the following:
+
+```markdown
+## Habits
+- [ ] habit1
+- [ ] habit2
+
+## Category1
+- [ ] task1
+- [ ] task2
+- [ ] [task3](link3)
+
+## Category2
+- [ ] task1
+- [ ] task2
+
+## Finish
+- [x] finish1
+```
+
+You could remove `##Habits` category if you do not want it, but you have to have the category `## Finish`. 
 
 ### Optional
 
