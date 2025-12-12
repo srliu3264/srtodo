@@ -8,7 +8,7 @@ SELF_PATH="$0"
 # --- HELPER FUNCTIONS ---
 function show_help() {
     echo "Usage: srtodo [OPTIONS]"
-    echo ""
+    echo "Simply run 'srtodo' without options to show the todo menu."
     echo "Options:"
     echo "  --config --path <path>   Set the path to your Markdown todo file"
     echo "  --template <path>        Generate a new template todo file at <path>"
@@ -18,6 +18,30 @@ function show_help() {
     echo "Example:"
     echo "  srtodo --template ~/documents/mytodo.md"
     echo "  srtodo --config --path ~/documents/mytodo.md"
+    echo "  srtodo"
+    echo "Todo Menu Usage:"
+    echo "  Use up/down arrow key to select, left/right arrow key to previous/next page"
+    echo "  Type content of tasks to filter"
+    echo "  Pressing <Esc> or Moving cursor to exit todo menu."
+    echo "  Pressing <Enter> to toggle completion of the task."
+    echo "  Pressing <Ctrl>+y to open the link."
+    cat << "EOF"
+                 ******       ******
+               **********   **********
+             ************* *************
+            *****************************
+            *****************************
+            *****************************
+             ***************************
+               ***********************
+                 *******************
+                   ***************
+                     ***********
+                       *******
+                         ***
+                          *
+EOF
+    echo "Github Page: https://github.com/srliu3264/srtodo"
 }
 
 function create_template() {
@@ -79,8 +103,14 @@ function perform_uninstall() {
         exit 1
     fi
 
-    echo ""
-    echo "Successfully uninstalled srtodo. Bye!"
+    echo "Successfully uninstalled srtodo. "
+
+    cat << "EOF"
+            ╔╗ ╦ ╦╔═╗
+            ╠╩╗╚╦╝║╣ 
+            ╚═╝ ╩ ╚═╝
+
+EOF
     exit 0
 }
 
